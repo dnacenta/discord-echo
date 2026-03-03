@@ -37,6 +37,14 @@ pub struct GatewayEvent {
 pub struct ReadyData {
     pub session_id: String,
     pub resume_gateway_url: String,
+    pub user: ReadyUser,
+}
+
+/// Bot user info from the READY event.
+#[derive(Debug, Deserialize)]
+pub struct ReadyUser {
+    pub id: String,
+    pub username: String,
 }
 
 /// Data from a MESSAGE_CREATE event.

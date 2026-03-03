@@ -23,6 +23,7 @@ pub async fn run_gateway(
 ) {
     let mut session_id: Option<String> = None;
     let mut resume_url: Option<String> = None;
+    let mut self_bot_id: Option<String> = None;
     let sequence = Arc::new(AtomicU64::new(0));
     let mut backoff_secs = 1u64;
 
@@ -178,7 +179,8 @@ pub async fn run_gateway(
                                                 if let Ok(ready) = serde_json::from_value::<ReadyData>(event.d) {
                                                     session_id = Some(ready.session_id);
                                                     resume_url = Some(ready.resume_gateway_url);
-                                                    tracing::info!("Gateway ready");
+                                                    self_bot_id = Some(ready.user.id.clone());
+                                                    tracing::info!("Gateway ready as {}", ready.user.username);
                                                 }
                                             }
                                             "RESUMED" => {
@@ -186,8 +188,11 @@ pub async fn run_gateway(
                                             }
                                             "MESSAGE_CREATE" => {
                                                 if let Ok(msg) = serde_json::from_value::<MessageCreateData>(event.d) {
-                                                    if msg.author.bot {
-                                                        continue;
+                                                    // Skip own messages (don't respond to self)
+                                                    if let Some(ref own_id) = self_bot_id {
+                                                        if msg.author.id == *own_id {
+                                                            continue;
+                                                        }
                                                     }
                                                     if !config.is_listen_channel(&msg.channel_id) {
                                                         continue;
