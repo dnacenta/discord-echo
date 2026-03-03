@@ -119,6 +119,19 @@ impl DiscordEcho {
     }
 }
 
+/// Silent response markers. If the entity's response starts with any of these,
+/// the forwarder will not post it to Discord. This lets the entity decide
+/// on a per-message basis whether to respond or stay quiet.
+const SILENT_MARKERS: &[&str] = &["[SILENT]", "[NO_RESPONSE]", "No response requested"];
+
+/// Check if a response indicates the entity chose not to respond.
+fn is_silent(response: &str) -> bool {
+    let trimmed = response.trim();
+    SILENT_MARKERS
+        .iter()
+        .any(|marker| trimmed.starts_with(marker))
+}
+
 /// Receives messages from the gateway, forwards to the entity's chat endpoint,
 /// and posts responses back to Discord.
 async fn message_forwarder(
@@ -166,10 +179,16 @@ async fn message_forwarder(
                                 .or_else(|| data["text"].as_str())
                                 .unwrap_or("");
 
-                            if !response_text.is_empty() {
+                            if !response_text.is_empty() && !is_silent(response_text) {
                                 if let Err(e) = client.send_message_by_id(&msg.channel_id, response_text).await {
                                     tracing::error!("Failed to reply in Discord: {e}");
                                 }
+                            } else if is_silent(response_text) {
+                                tracing::debug!(
+                                    "Silent response for message from {} in #{}",
+                                    msg.author_name,
+                                    channel_label,
+                                );
                             }
                         }
                     }
@@ -216,6 +235,19 @@ mod tests {
         assert!(!prompts.is_empty());
         assert!(prompts.iter().any(|p| p.key == "bot_token"));
         assert!(prompts.iter().any(|p| p.key == "guild_id"));
+    }
+
+    #[test]
+    fn test_is_silent() {
+        assert!(is_silent("[SILENT]"));
+        assert!(is_silent("[SILENT] I have nothing to add"));
+        assert!(is_silent("[NO_RESPONSE]"));
+        assert!(is_silent("No response requested"));
+        assert!(is_silent("No response requested."));
+        assert!(is_silent("  [SILENT]  ")); // trimmed
+        assert!(!is_silent("Hello, how are you?"));
+        assert!(!is_silent(""));
+        assert!(!is_silent("I think [SILENT] is interesting")); // not at start
     }
 
     #[test]
