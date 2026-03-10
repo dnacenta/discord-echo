@@ -8,7 +8,7 @@ description = "Discord text integration for echo-system entities"
 repository = "https://github.com/dnacenta/discord-echo"
 
 [dependencies]
-echo-system-types = { git = "https://github.com/dnacenta/echo-system-types", branch = "feat/v0.4.0-plugin-trait" }
+echo-system-types = { git = "https://github.com/dnacenta/echo-system-types", branch = "main" }
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
 futures-util = "0.3"
