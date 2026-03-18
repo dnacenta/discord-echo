@@ -9,8 +9,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use echo_system_types::plugin::{Plugin, PluginContext, PluginResult, PluginRole};
-use echo_system_types::{HealthStatus, PluginMeta, SetupPrompt};
+use pulse_system_types::plugin::{Plugin, PluginContext, PluginResult, PluginRole};
+use pulse_system_types::{HealthStatus, PluginMeta, SetupPrompt};
 use tokio::sync::{mpsc, Notify};
 
 use crate::client::DiscordClient;
