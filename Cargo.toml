@@ -6,9 +6,13 @@ rust-version = "1.80"
 license = "AGPL-3.0-only"
 description = "Discord text integration for echo-system entities"
 repository = "https://github.com/dnacenta/discord-echo"
+keywords = ["ai", "discord", "chat", "entity", "llm"]
+categories = ["api-bindings"]
+authors = ["dnacenta"]
+readme = "README.md"
 
 [dependencies]
-pulse-system-types = { git = "https://github.com/dnacenta/pulse-null-types", branch = "main" }
+pulse-system-types = "0.5"
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
 futures-util = "0.3"
